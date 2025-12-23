@@ -1,0 +1,52 @@
+{
+    "name": "Papra",
+    "slug": "papra",
+    "categories": [
+        12
+    ],
+    "date_created": "2025-01-27",
+    "type": "ct",
+    "updateable": true,
+    "privileged": false,
+    "interface_port": 1221,
+    "documentation": "https://docs.papra.app/",
+    "website": "https://papra.app/",
+    "logo": null,
+    "config_path": "/opt/papra",
+    "description": "Papra is a document management and organization system that provides a streamlined way to manage, organize, and access your documents. It offers features for document ingestion, tagging, search, and secure storage.",
+    "install_methods": [
+        {
+            "type": "default",
+            "script": "ct/papra.sh",
+            "resources": {
+                "cpu": 2,
+                "ram": 4096,
+                "hdd": 10,
+                "os": "debian",
+                "version": "13"
+            }
+        }
+    ],
+    "default_credentials": {
+        "username": null,
+        "password": null
+    },
+    "notes": [
+        {
+            "text": "Configuration file: /opt/papra/.env - Edit this file to customize Papra settings.",
+            "type": "info"
+        },
+        {
+            "text": "After editing the configuration file, restart the service with: systemctl restart papra",
+            "type": "warning"
+        },
+        {
+            "text": "Persistent data is stored in /opt/papra/app-data. Make sure to backup this directory regularly.",
+            "type": "warning"
+        },
+        {
+            "text": "For all configuration options, see: https://docs.papra.app/self-hosting/configuration/",
+            "type": "info"
+        }
+    ]
+}
