@@ -1447,6 +1447,20 @@ validate_github_token() {
 # Returns 0 if a valid token was provided, 1 otherwise
 # ------------------------------------------------------------------------------
 prompt_for_github_token() {
+  # Skip prompt in command substitution ($(...)) — the read goes to /dev/tty
+  # but the surrounding context (e.g. get_latest_gh_tag called via $(...)) can't
+  # see the answer, making the prompt useless and the spinner appear hung.
+  if ((BASH_SUBSHELL > 0)); then
+    if [[ -z "${GITHUB_TOKEN:-}" && -n "${var_github_token:-}" ]]; then
+      export GITHUB_TOKEN="${var_github_token}"
+      msg_ok "GitHub token loaded from var_github_token."
+      return 0
+    fi
+    msg_error "GitHub token required but cannot prompt (running in subshell)."
+    msg_error "Set it before running: export GITHUB_TOKEN=\"ghp_your_token_here\""
+    return 1
+  fi
+
   if [[ ! -t 0 ]]; then
     # Non-interactive: pick up var_github_token if set (from default.vars / app.vars / env)
     if [[ -z "${GITHUB_TOKEN:-}" && -n "${var_github_token:-}" ]]; then
@@ -1515,7 +1529,7 @@ github_api_call() {
   local attempt=1
   while ((attempt <= max_retries)); do
     local http_code
-    http_code=$(curl -sSL -w "%{http_code}" -o "$output_file" \
+    http_code=$(curl -sSL --connect-timeout 10 --max-time 30 -w "%{http_code}" -o "$output_file" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
       "${header_args[@]}" \
@@ -1600,7 +1614,7 @@ codeberg_api_call() {
 
   for attempt in $(seq 1 $max_retries); do
     local http_code
-    http_code=$(curl -sSL -w "%{http_code}" -o "$output_file" \
+    http_code=$(curl -sSL --connect-timeout 10 --max-time 30 -w "%{http_code}" -o "$output_file" \
       -H "Accept: application/json" \
       "$url" 2>/dev/null) || true
 
